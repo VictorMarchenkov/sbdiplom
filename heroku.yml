@@ -1,4 +1,4 @@
 build:
   docker:
     web: Dockerfile
-run: bundle exec start.sh
+run: bundle exec ./start.sh

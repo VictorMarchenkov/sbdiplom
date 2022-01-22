@@ -4,7 +4,7 @@ import (
 	"flag"
 	"github.com/haxii/daemon"
 
-	"sbdaemon/internal/app/v2"
+	"sbdiplom/internal"
 )
 
 var (
@@ -14,8 +14,8 @@ var (
 
 func main() {
 	flag.Parse()
-	d := daemon.Make("-s", "main", "simple http daemon service")
-	d.Run(func() {
-		app.Run(*port)
-	})
+	//	d := daemon.Make("-s", "diploma", "simple http daemon service")
+	//	d.Run(func() {
+	internal.Run(port)
+	//	})
 }

@@ -6,15 +6,15 @@ import (
 	"io"
 	"log"
 	"net/http"
-	config "sbdaemon/config"
-	"sbdaemon/pkg"
+	"sbdiplom/internal/config"
+	"sbdiplom/internal/pkg"
 	"sort"
 	"strconv"
 )
 
 // CSV
 
-// SMSData describes the data structure sms.
+// SMSData describes the data structure sms service.
 type SMSData struct {
 	Country      string `json:"country"`
 	Bandwidth    string `json:"bandwidth"`
@@ -22,6 +22,7 @@ type SMSData struct {
 	Provider     string `json:"provider"`
 }
 
+// VoiceCallData describes the data structure voice calls service.
 type VoiceCallData struct {
 	Country             string  `json:"country"`
 	Bandwidth           string  `json:"bandwidth"`
@@ -33,12 +34,14 @@ type VoiceCallData struct {
 	MedianOfCallsTime   int     `json:"median_of_call_time"`
 }
 
+// EmailData describes the data structure email service.
 type EmailData struct {
 	Country      string `json:"country"`
 	Provider     string `json:"provider"`
 	DeliveryTime int    `json:"delivery_time"`
 }
 
+// BillingData describes the data structure billing service.
 type BillingData struct {
 	CreateCustomer bool `json:"create_customer"`
 	Purchase       bool `json:"purchase"`
@@ -50,6 +53,7 @@ type BillingData struct {
 
 // HTTP
 
+// MMSData describes the data structure mms service.
 type MMSData struct {
 	Country      string `json:"country"`
 	Provider     string `json:"provider"`
@@ -57,24 +61,26 @@ type MMSData struct {
 	ResponseTime string `json:"response_time"`
 }
 
+// SupportData describes the data structure support service.
 type SupportData struct {
 	Topic         string `json:"topic"`
 	ActiveTickets int    `json:"active_tickets"`
 }
 
+// IncidentData describes the data structure incident service.
 type IncidentData struct {
 	Topic  string `json:"topic"`
 	Status string `json:"status"`
 }
 
-// ResultT structure to collects all information.
+// ResultT structure to collect all information.
 type ResultT struct {
 	Status bool       `json:"status"` // заполнен если все ОК, nil в противном случае
 	Data   ResultSetT `json:"data"`
 	Error  string     `json:"error"` // пустая строка если все ОК, в противеом случае тест ошибки
 }
 
-// ResultSetT structure to collects al data.
+// ResultSetT structure to collect al data.
 type ResultSetT struct {
 	SMS       [][]SMSData     `json:"sms"`
 	MMS       [][]MMSData     `json:"mms"`
@@ -134,14 +140,16 @@ func (t *ResultT) HandlerT(w http.ResponseWriter, r *http.Request) {
 	}
 	t.Data.Support = SUPPORT
 
-	tt, _ := json.Marshal(t)
-	w.Write(tt)
+	data, _ := json.Marshal(t)
+	w.Write(data)
 }
 
 // HandlerB  method for treating files.
 func (t *ResultT) HandlerB(cfg Config) {
+	cfg_ := config.GetConfig()
+	json.Unmarshal(cfg_, &cfg)
+
 	pathSms := cfg.CSV.Sms
-	//	fmt.Println(pathSms)
 	SMS := SmsHandler(pathSms)
 	t.Data.SMS = SMS
 
@@ -171,7 +179,7 @@ func MmsHandler(w http.ResponseWriter, r *http.Request) ([][]MMSData, error) {
 
 	url_ := fmt.Sprintf(":%d%s", confT.HTTP.ServicePort, confT.HTTP.Mms)
 
-	url := "http://localhost" + url_
+	url := "http://0.0.0.0" + url_
 	res, err := http.Get(url)
 	if err != nil {
 		log.Println(err)
@@ -214,7 +222,7 @@ func SupportHandler(w http.ResponseWriter, r *http.Request) ([]int, error) {
 	cfg := config.GetConfig()
 	json.Unmarshal(cfg, &confT)
 	url_ := fmt.Sprintf(":%d%s", confT.HTTP.ServicePort, confT.HTTP.Support)
-	url := "http://localhost" + url_
+	url := "http://0.0.0.0" + url_
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -262,7 +270,7 @@ func IncidentHandler(w http.ResponseWriter, r *http.Request) ([]IncidentData, er
 	cfg := config.GetConfig()
 	json.Unmarshal(cfg, &confT)
 	url_ := fmt.Sprintf(":%d%s", confT.HTTP.ServicePort, confT.HTTP.Incident)
-	url := "http://localhost" + url_
+	url := "http://0.0.0.0" + url_
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -280,7 +288,7 @@ func IncidentHandler(w http.ResponseWriter, r *http.Request) ([]IncidentData, er
 
 	if err := json.Unmarshal(rr, &result); err != nil {
 		w.WriteHeader(500)
-		log.Println(err)
+		log.Println("error filling incidents structure with data", err)
 		return nil, err
 	}
 	//	w.WriteHeader(200)
@@ -299,7 +307,6 @@ func SmsHandler(path string) [][]SMSData {
 		return nil
 	}
 	for _, str := range csv {
-		fmt.Println("===>", str, len(str))
 		if len(str) == 4 {
 			if pkg.IsValidCountryCode(str[0]) && pkg.IsValidProvider(str[3]) {
 				sms.Country = str[0]
@@ -307,9 +314,11 @@ func SmsHandler(path string) [][]SMSData {
 				sms.ResponseTime = str[2]
 				sms.Provider = str[3]
 				result = append(result, sms)
+			} else {
+				fmt.Println("unvalid parameters for country or provider:", str)
 			}
 		} else {
-			fmt.Println("corrupted string", str)
+			fmt.Println("there is a corrupted string in sms.data", str)
 		}
 	}
 
@@ -329,6 +338,7 @@ func SmsHandler(path string) [][]SMSData {
 func VoiceHandler(path string) []VoiceCallData {
 	var voice VoiceCallData
 	var result []VoiceCallData
+
 	csv := pkg.ReadCSV(path)
 
 	for _, str := range csv {
@@ -351,9 +361,11 @@ func VoiceHandler(path string) []VoiceCallData {
 
 					result = append(result, voice)
 				}
+			} else {
+				fmt.Println("unvalid parameters for country or provider:", str)
 			}
 		} else {
-			fmt.Println("corrupted string", str)
+			fmt.Println("there is a corrupted string in voice.data", str)
 		}
 	}
 	return result
@@ -376,13 +388,14 @@ func EmailHandler(path string) [][]EmailData {
 				result = append(result, email)
 			}
 		} else {
-			fmt.Println("corrupted string", str)
+			fmt.Println("there is a corrupted string in email.data", str)
 		}
 	}
 	sort.Slice(result, func(i, j int) bool {
 		return result[i].DeliveryTime < result[j].DeliveryTime
 	})
 	var resultCopy [][]EmailData
+
 	resultCopy = append(resultCopy, result[0:3])
 	resultCopy = append(resultCopy, result[len(result)-4:len(result)-1])
 
@@ -415,7 +428,7 @@ func BillingHandler(path string) BillingData {
 			billing.FraudControl = d&(1<<uint(4)) != 0
 			billing.CheckoutPage = d&(1<<uint(5)) != 0
 		} else {
-			fmt.Println("corrupted string", str)
+			fmt.Println("there is a corrupted string in billing.data", str)
 		}
 	}
 	return billing

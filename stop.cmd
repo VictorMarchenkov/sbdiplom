@@ -1,4 +1,4 @@
-docker rmi -f diplom
+docker rmi -f diploma
 docker rm -f $(docker ps -a -q)
 echo "removing container"
 pause

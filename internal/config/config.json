@@ -1,9 +1,9 @@
 {
   "csv": {
-    "sms": "./generator/sms.data",
-    "voice": "generator/voice.data",
-    "email": "generator/email.data",
-    "billing": "generator/billing.data"
+    "sms": "internal/generator/sms.data",
+    "voice": "internal/generator/voice.data",
+    "email": "internal/generator/email.data",
+    "billing": "internal/generator/billing.data"
   },
   "httpreq": {
     "server_port": 8282,

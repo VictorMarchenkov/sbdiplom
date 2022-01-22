@@ -1,4 +1,4 @@
-package internal
+package config
 
 import (
 	"io/ioutil"
@@ -6,7 +6,8 @@ import (
 )
 
 func GetConfig() []byte {
-	rawConfig, err := ioutil.ReadFile("../../config.json")
+
+	rawConfig, err := ioutil.ReadFile("internal/config/config.json")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
