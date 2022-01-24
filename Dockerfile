@@ -8,7 +8,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o diploma ./main.go
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o ./internal/generator/generator ./internal/generator/main.go
 
-EXPOSE 8282 8383
+EXPOSE 8282
 
 CMD ["./start.sh"]
 
