@@ -1,5 +1,8 @@
 (function(){
     let apiPath = 'http://localhost:8282/api';
+    if (window.location.host !== "localhost") {
+        apiPath = `https://${window.location.host}/api`
+    }   
     //let apiPath = 'response/error.json';
 
     let dataScheme = {
