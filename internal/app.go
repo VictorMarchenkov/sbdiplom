@@ -8,7 +8,7 @@ import (
 func Run(port *int) {
 	var cfgCSV Config
 	var resultT ResultT
-	//r := mux.NewRouter()
+	
 	resultT.HandlerB(cfgCSV)
 	http.HandleFunc("/api", resultT.HandlerT)
 
