@@ -14,8 +14,5 @@ var (
 
 func main() {
 	flag.Parse()
-	//	d := daemon.Make("-s", "diploma", "simple http daemon service")
-	//	d.Run(func() {
 	internal.Run(port)
-	//	})
 }
