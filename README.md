@@ -2,17 +2,6 @@
 
 This package provides a service developed as diploma to Skillbox course "GO-разработчик"
 
-After some analysing we decide to use as base packages:
-
-
-# Directory structure
-
-```
-- cmd
-- internal
-- pkg
-```
-
 
 ## heroku
 [Getting Started on Heroku with Go](https://devcenter.heroku.com/articles/getting-started-with-go)
